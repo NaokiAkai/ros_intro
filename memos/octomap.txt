@@ -1,0 +1,9 @@
+git clone https://github.com/OctoMap/octomap.git
+cd octomap
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+
+sudo apt install ros-melodic-octomap-ros ros-melodic-octomap-rviz-plugins
