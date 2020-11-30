@@ -218,6 +218,15 @@ link_libraries(${OCTOMAP_LIBRARIES})
 add_executable(voxel_grid_filter src/voxel_grid_filter.cpp)
 target_link_libraries(voxel_grid_filter ${catkin_LIBRARIES})
 
+add_executable(points_printer src/points_printer.cpp)
+target_link_libraries(points_printer ${catkin_LIBRARIES})
+
+add_executable(cubes_vis src/cubes_vis.cpp)
+target_link_libraries(cubes_vis ${catkin_LIBRARIES})
+
+add_executable(ndt src/ndt.cpp)
+target_link_libraries(ndt ${catkin_LIBRARIES})
+
 add_executable(octomap_vis src/octomap_vis.cpp)
 target_link_libraries(octomap_vis ${catkin_LIBRARIES} ${OCTOMAP_LIBRARIES})
 
