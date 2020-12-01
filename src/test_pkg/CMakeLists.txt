@@ -217,5 +217,8 @@ target_link_libraries(test_pub ${catkin_LIBRARIES})
 add_executable(test_sub src/test_sub.cpp)
 target_link_libraries(test_sub ${catkin_LIBRARIES})
 
+add_executable(test_class_pub src/test_class_pub.cpp)
+target_link_libraries(test_class_pub ${catkin_LIBRARIES})
 
-
+add_executable(test_class_sub src/test_class_sub.cpp)
+target_link_libraries(test_class_sub ${catkin_LIBRARIES})
