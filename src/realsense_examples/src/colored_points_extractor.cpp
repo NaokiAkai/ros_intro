@@ -8,7 +8,6 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include <pcl/filters/voxel_grid.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 
@@ -93,6 +92,9 @@ void ColoredPointsExtractor::pointsCB(const pcl::PointCloud<pcl::PointXYZRGB>::C
     coloredPoints.header = msg->header;
 
     for (size_t i = 0; i < msg->points.size(); i++) {
+        if (std::isnan(msg->points[i].x) || std::isnan(msg->points[i].y) || std::isnan(msg->points[i].z))
+            continue;
+
         float h, s, v;
         rgb2hsv(msg->points[i].r, msg->points[i].g, msg->points[i].b, &h, &s, &v);
 
@@ -103,7 +105,7 @@ void ColoredPointsExtractor::pointsCB(const pcl::PointCloud<pcl::PointXYZRGB>::C
             deltaAngle += 360.0f;
         while (deltaAngle > 180.0f)
             deltaAngle -= 360.0f;
-        if (fabs(deltaAngle) <= 30.0f && s >= 0.5f && v > 0.7f)
+        if (fabs(deltaAngle) <= 30.0f && s >= 0.3f && v > 0.3f)
             coloredPoints.points.push_back(msg->points[i]);
     }
     pointsPub_.publish(coloredPoints);

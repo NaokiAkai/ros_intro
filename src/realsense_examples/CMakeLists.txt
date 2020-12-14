@@ -224,6 +224,9 @@ target_link_libraries(points_printer ${catkin_LIBRARIES})
 add_executable(colored_points_extractor src/colored_points_extractor.cpp)
 target_link_libraries(colored_points_extractor ${catkin_LIBRARIES})
 
+add_executable(points_cluster src/points_cluster.cpp)
+target_link_libraries(points_cluster ${catkin_LIBRARIES})
+
 add_executable(cubes_vis src/cubes_vis.cpp)
 target_link_libraries(cubes_vis ${catkin_LIBRARIES})
 
