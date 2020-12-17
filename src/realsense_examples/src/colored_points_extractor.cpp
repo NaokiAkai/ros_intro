@@ -18,13 +18,30 @@ private:
     ros::Publisher pointsPub_;
     std::string inputTopicName_, outputTopicName_;
 
+    // HSV表色系での抽出するHの値です．
+    // 単位はdegreeで0から360の値です．
+    float targetHueAngle_;
+
+    // HSV表色系で色抽出する際の閾値です．
+    // deltaHueThreshold_の単位はdegreeで0から360の値です．
+    // saturationThreshold_とvalueThreshold_は0から1の値です．
+    float deltaHueThreshold_, saturationThreshold_, valueThreshold_;
+
 public:
     ColoredPointsExtractor(void):
         nh_("~"),
         inputTopicName_("/camera/depth_registered/points"),
-        outputTopicName_("/camera/depth_registered/colored_points")
+        outputTopicName_("/camera/depth_registered/colored_points"),
+        targetHueAngle_(0.0f),
+        deltaHueThreshold_(30.0f),
+        saturationThreshold_(0.3f),
+        valueThreshold_(0.3f)
     {
         nh_.param("raw_points_name", inputTopicName_, inputTopicName_);
+        nh_.param("target_hue_angle", targetHueAngle_, targetHueAngle_);
+        nh_.param("delta_hue_threshold", deltaHueThreshold_, deltaHueThreshold_);
+        nh_.param("saturation_threshold", saturationThreshold_, saturationThreshold_);
+        nh_.param("value_threshold", valueThreshold_, valueThreshold_);
 
         pointsSub_ = nh_.subscribe(inputTopicName_, 1, &ColoredPointsExtractor::pointsCB, this);
 
@@ -98,14 +115,12 @@ void ColoredPointsExtractor::pointsCB(const pcl::PointCloud<pcl::PointXYZRGB>::C
         float h, s, v;
         rgb2hsv(msg->points[i].r, msg->points[i].g, msg->points[i].b, &h, &s, &v);
 
-        // H = 0の周辺が赤です．
-        // その差分を取り，30度以内のデータを赤と認識します．
-        float deltaAngle = h - 0.0f;
-        while (deltaAngle < -180.0f)
-            deltaAngle += 360.0f;
-        while (deltaAngle > 180.0f)
-            deltaAngle -= 360.0f;
-        if (fabs(deltaAngle) <= 30.0f && s >= 0.3f && v > 0.3f)
+        float deltaHue = h - targetHueAngle_;
+        while (deltaHue < -180.0f)
+            deltaHue += 360.0f;
+        while (deltaHue > 180.0f)
+            deltaHue -= 360.0f;
+        if (fabs(deltaHue) <= deltaHueThreshold_ && s >= saturationThreshold_ && v > valueThreshold_)
             coloredPoints.points.push_back(msg->points[i]);
     }
     pointsPub_.publish(coloredPoints);

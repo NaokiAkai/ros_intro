@@ -4,6 +4,10 @@
  * 作者: 赤井直紀
  */
 
+// Arduinoにサーボモータが繋がっている前提のプロフラムです．
+// Arduinoに書き込まれているプログラムは以下になります．
+// ros_intro/arduino/ServoVelocityControl/ServoVelocityControl.ino
+
 #include <ros/ros.h>
 
 // サーボモータへ速度の指令はgeometry_msgs::TwistStampedで受け取ります．
@@ -94,6 +98,7 @@ void ArduinoServoController::twistCB(const geometry_msgs::TwistStamped::ConstPtr
     // サーボモータへの速度指令を書き込みます．
     // yaw軸方向の速度のみを利用します．
     int yawAngVel = (int)(msg->twist.angular.z);
+    // '\0'がコマンドの最後を意味する文字となっています．
     std::string cmd = std::to_string(yawAngVel) + '\0';
     int retVal = write(fd_, cmd.c_str(), cmd.length());
     prevTime = currTime;
