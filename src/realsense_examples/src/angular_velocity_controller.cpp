@@ -117,10 +117,11 @@ void AngularVelocityController::pointsCB(const pcl::PointCloud<pcl::PointXYZ>::C
         dDeltaTheta += 180.0f;
     while (dDeltaTheta > 180.0f)
         dDeltaTheta -= 180.0f;
+//    printf("targetX = %f, targetY = %f, deltaTheta = %f\n", targetX, targetY, deltaTheta);
 
     // PID制御で角速度を求めます．
     float angVel = pGain_ * deltaTheta + iGain_ * deltaThetaSum + dGain_ * dDeltaTheta;
-    printf("time = %lf, angVel = %.2f [deg/sec]\n", header.stamp.toSec(), angVel);
+//    printf("time = %lf, angVel = %.2f [deg/sec]\n", header.stamp.toSec(), angVel);
 
     // 配信する前に角速度のチェックを行います（超重要！）．
     if (std::isnan(angVel))

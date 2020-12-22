@@ -69,7 +69,10 @@ public:
     }
 
     ~ArduinoServoController(void) {
-        // プログラムの終了と同時にデバイスを閉じます．
+        // プログラム終了時に角速度を0にしてデバイスを閉じます．
+        std::string cmd = std::to_string(0) + '\0';
+        int retVal = write(fd_, cmd.c_str(), cmd.length());
+        sleep(1);
         close(fd_);
     }
 
