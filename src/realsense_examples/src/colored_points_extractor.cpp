@@ -38,6 +38,7 @@ public:
         valueThreshold_(0.3f)
     {
         nh_.param("raw_points_name", inputTopicName_, inputTopicName_);
+        nh_.param("colored_points_name", outputTopicName_, outputTopicName_);
         nh_.param("target_hue_angle", targetHueAngle_, targetHueAngle_);
         nh_.param("delta_hue_threshold", deltaHueThreshold_, deltaHueThreshold_);
         nh_.param("saturation_threshold", saturationThreshold_, saturationThreshold_);

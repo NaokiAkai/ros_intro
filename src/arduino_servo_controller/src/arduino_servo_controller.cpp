@@ -34,12 +34,19 @@ private:
     std::string device_;
     int baudRate_;
 
+    // ログ記録用のファイルです．
+    // setLogFilePathメソッドが呼び出されると，ログに書き込む様になります．
+    std::string logFilePath_;
+    bool writeLog_;
+    FILE *fpLog_;
+
 public:
     ArduinoServoController(void):
         nh_("~"),
         inputTopicName_("/servo_motor_twist_cmd"),
         device_("/dev/ttyACM0"),
-        baudRate_(B9600)
+        baudRate_(B9600),
+        writeLog_(false)
     {
         nh_.param("servo_motor_twist_cmd", inputTopicName_, inputTopicName_);
         nh_.param("arduino_device", device_, device_);
@@ -74,15 +81,36 @@ public:
         int retVal = write(fd_, cmd.c_str(), cmd.length());
         sleep(1);
         close(fd_);
+
+        // ログを書き込んでいた場合は記録していたファイルを閉じます．
+        if (writeLog_)
+            fclose(fpLog_);
     }
 
     void spin(void);
+
+    void setLogFilePath(std::string logFilePath);
 
     void twistCB(const geometry_msgs::TwistStamped::ConstPtr &msg);
 };
 
 void ArduinoServoController::spin(void) {
     ros::spin();
+}
+
+// ログを記録するための設定をします．
+void ArduinoServoController::setLogFilePath(std::string logFilePath) {
+    logFilePath_ = logFilePath;
+    writeLog_ = true;
+    fpLog_ = fopen(logFilePath_.c_str(), "w");
+    if (fpLog_ == NULL) {
+        // ファイルが開けなかった場合はログの書き込みを行いません．
+        fprintf(stderr, "CAUTION: A log file, %s, could be opend. The logs will not be saved.\n", logFilePath_.c_str());
+        writeLog_ = false;
+    } else {
+        printf("The logs will be written at %s.\n", logFilePath_.c_str());
+        fprintf(fpLog_, "# currTime msg->twist.angular.z yawAngVel\n");
+    }
 }
 
 void ArduinoServoController::twistCB(const geometry_msgs::TwistStamped::ConstPtr &msg) {
@@ -106,12 +134,25 @@ void ArduinoServoController::twistCB(const geometry_msgs::TwistStamped::ConstPtr
     int yawAngVel = (int)(msg->twist.angular.z);
     std::string cmd = std::to_string(yawAngVel) + '\0';
     int retVal = write(fd_, cmd.c_str(), cmd.length());
+
+    // ログを記録します．
+    if (writeLog_)
+        fprintf(fpLog_, "%lf %lf %d\n", currTime, msg->twist.angular.z, yawAngVel);
+
+    // 前回の時刻を記録します．
     prevTime = currTime;
 }
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "arduino_servo_controller");
     ArduinoServoController asc;
+
+    // プログラムに引数（ログファイルのパス）が与えられていた場合，ログを書き込む設定をします．
+    if (argv[1] != NULL) {
+        std::string logFilePath = argv[1];
+        asc.setLogFilePath(logFilePath);
+    }
+
     asc.spin();
     return 0;
 }

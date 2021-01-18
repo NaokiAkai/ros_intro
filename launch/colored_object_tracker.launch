@@ -1,0 +1,85 @@
+<!-- colored_object_tracker.launch -->
+<launch >
+    <!-- arguments -->
+
+    <!-- for launch script of the realsense -->
+    <arg name="raw_points_name" default="/camera/depth_registered/points" />
+
+    <!-- for colored points extracter -->
+    <arg name="colored_points_name" default="/camera/depth_registered/colored_points" />
+    <arg name="target_hue_angle" default="0.0" />
+    <arg name="delta_hue_threshold" default="30.0" />
+    <arg name="saturation_threshold" default="0.3" />
+    <arg name="value_threshold" default="0.3" />
+
+    <!-- for points cluster -->
+    <arg name="clustered_points_name" default="/camera/depth_registered/clustered_points" />
+    <arg name="filtered_points_name" default="/camera/depth_registered/filtered_points" />
+    <arg name="clustered_centroids_name" default="/camera/depth_registered/cluster_centroids" />
+    <arg name="clustering_vgf_reso_x" default="0.01" />
+    <arg name="clustering_vgf_reso_y" default="0.01" />
+    <arg name="clustering_vgf_reso_z" default="0.01" />
+    <arg name="min_cluster_size" default="10" />
+    <arg name="cluster_tolerance" default="0.03" />
+
+    <!-- for angular velocity controller -->
+    <arg name="servo_motor_twist_cmd" default="/servo_motor_twist_cmd" />
+    <arg name="servo_controller_p_gain" default="1.0" />
+    <arg name="servo_controller_i_gain" default="0.0" />
+    <arg name="servo_controller_d_gain" default="0.01" />
+    <arg name="servo_controller_max_ang_vel" default="40.0" />
+
+    <!-- for arduino servo controller -->
+    <arg name="arduino_device" default="/dev/ttyACM0" />
+    <arg name="arduino_baud_rate" default="B9600" />
+    <arg name="log_file_path" default="/tmp/log.txt" />
+
+
+
+    <!-- execute launch files -->
+
+    <!-- realsense rs_rgbd.launch -->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch" />
+
+    <!-- execute nodes -->
+
+    <!-- colored_points_extractor -->
+    <node name="colored_points_extractor" pkg="realsense_examples" type="colored_points_extractor" output="log" >
+        <param name="/raw_points_name" value="$(arg raw_points_name)" type="string" />
+        <param name="/colored_points_name" value="$(arg colored_points_name)" type="string" />
+        <param name="/target_hue_angle" value="$(arg target_hue_angle)" type="double" />
+        <param name="/delta_hue_threshold" value="$(arg delta_hue_threshold)" type="double" />
+        <param name="/saturation_threshold" value="$(arg saturation_threshold)" type="double" />
+        <param name="/value_threshold" value="$(arg value_threshold)" type="double" />
+    </node >
+
+    <!-- points_cluster -->
+    <node name="points_cluster" pkg="realsense_examples" type="points_cluster" output="log" >
+        <param name="/source_points_name" value="$(arg colored_points_name)" type="string" />
+        <param name="/clustered_points_name" value="$(arg clustered_points_name)" type="string" />
+        <param name="/filtered_points_name" value="$(arg filtered_points_name)" type="string" />
+        <param name="/clustered_centroids_name" value="$(arg clustered_centroids_name)" type="string" />
+        <param name="/clustering_vgf_reso_x" value="$(arg clustering_vgf_reso_x)" type="double" />
+        <param name="/clustering_vgf_reso_y" value="$(arg clustering_vgf_reso_y)" type="double" />
+        <param name="/clustering_vgf_reso_z" value="$(arg clustering_vgf_reso_z)" type="double" />
+        <param name="/min_cluster_size" value="$(arg min_cluster_size)" type="int" />
+        <param name="/cluster_tolerance" value="$(arg cluster_tolerance)" type="double" />
+    </node >
+
+    <!-- angular_velocity_controller -->
+    <node name="angular_velocity_controller" pkg="realsense_examples" type="angular_velocity_controller" output="log" >
+        <param name="/clustered_centroids_name" value="$(arg clustered_centroids_name)" type="string" />
+        <param name="/servo_motor_twist_cmd" value="$(arg servo_motor_twist_cmd)" type="string" />
+        <param name="/servo_controller_p_gain" value="$(arg servo_controller_p_gain)" type="double" />
+        <param name="/servo_controller_i_gain" value="$(arg servo_controller_i_gain)" type="double" />
+        <param name="/servo_controller_d_gain" value="$(arg servo_controller_d_gain)" type="double" />
+        <param name="/servo_controller_max_ang_vel" value="$(arg servo_controller_max_ang_vel)" type="double" />
+    </node >
+
+    <!-- arduino_servo_controller -->
+    <node name="arduino_servo_controller" pkg="arduino_servo_controller" type="arduino_servo_controller" args="$(arg log_file_path)" output="screen" >
+        <param name="/servo_motor_twist_cmd" value="$(arg servo_motor_twist_cmd)" type="string" />
+        <param name="/arduino_device" value="$(arg arduino_device)" type="string" />
+        <param name="/arduino_baud_rate" value="$(arg arduino_baud_rate)" type="string" />
+    </node >
+</launch >
