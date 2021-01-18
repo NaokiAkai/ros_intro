@@ -32,7 +32,7 @@
     <!-- for arduino servo controller -->
     <arg name="arduino_device" default="/dev/ttyACM0" />
     <arg name="arduino_baud_rate" default="B9600" />
-    <arg name="log_file_path" default="/tmp/log.txt" />
+    <arg name="log_file_path" default="/tmp/log.csv" />
 
 
 

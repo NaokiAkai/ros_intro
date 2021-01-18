@@ -109,16 +109,16 @@ void ArduinoServoController::setLogFilePath(std::string logFilePath) {
         writeLog_ = false;
     } else {
         printf("The logs will be written at %s.\n", logFilePath_.c_str());
-        fprintf(fpLog_, "# currTime msg->twist.angular.z yawAngVel\n");
+        fprintf(fpLog_, "# time msg->twist.angular.z yawAngVel\n");
     }
 }
 
 void ArduinoServoController::twistCB(const geometry_msgs::TwistStamped::ConstPtr &msg) {
     // 前回書き込みをした時間を記録しておきます．
     static bool isFirst = true;
-    static double prevTime;
+    static double firstTime, prevTime;
     if (isFirst) {
-        prevTime = msg->header.stamp.toSec();
+        firstTime = prevTime = msg->header.stamp.toSec();
         isFirst = false;
     }
 
@@ -137,7 +137,7 @@ void ArduinoServoController::twistCB(const geometry_msgs::TwistStamped::ConstPtr
 
     // ログを記録します．
     if (writeLog_)
-        fprintf(fpLog_, "%lf %lf %d\n", currTime, msg->twist.angular.z, yawAngVel);
+        fprintf(fpLog_, "%lf,%lf,%d\n", currTime - firstTime, msg->twist.angular.z, yawAngVel);
 
     // 前回の時刻を記録します．
     prevTime = currTime;
