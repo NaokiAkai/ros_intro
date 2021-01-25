@@ -109,7 +109,7 @@ void ArduinoServoController::setLogFilePath(std::string logFilePath) {
         writeLog_ = false;
     } else {
         printf("The logs will be written at %s.\n", logFilePath_.c_str());
-        fprintf(fpLog_, "# time msg->twist.angular.z yawAngVel\n");
+        fprintf(fpLog_, "time,msg->twist.angular.z,yawAngVel\n");
     }
 }
 

@@ -114,9 +114,9 @@ void AngularVelocityController::pointsCB(const pcl::PointCloud<pcl::PointXYZ>::C
     // D制御のための値を計算します（角度の差分は必ず−180から180度の値でないといけません）．
     float dDeltaTheta = deltaTheta - prevDeltaTheta;
     while (dDeltaTheta < -180.0f)
-        dDeltaTheta += 180.0f;
+        dDeltaTheta += 360.0f;
     while (dDeltaTheta > 180.0f)
-        dDeltaTheta -= 180.0f;
+        dDeltaTheta -= 360.0f;
 //    printf("targetX = %f, targetY = %f, deltaTheta = %f\n", targetX, targetY, deltaTheta);
 
     // PID制御で角速度を求めます．
